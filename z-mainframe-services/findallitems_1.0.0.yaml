@@ -1,0 +1,118 @@
+swagger: '2.0'
+info:
+  title: findAllItems
+  x-ibm-name: findallitems
+  version: 1.0.0
+  description: >-
+    API to find info for an all items (limited to 15 items for the demo).  Uses
+    getFindItemMulti Service
+host: $(catalog.host)
+schemes:
+  - https
+basePath: /findAllItems
+produces:
+  - application/json
+consumes:
+  - application/json
+x-ibm-configuration:
+  cors:
+    enabled: true
+  gateway: datapower-api-gateway
+  properties:
+    target-url:
+      value: 'https://localhost:8080'
+      description: The URL of the target service
+      encoded: false
+  assembly:
+    execute:
+      - invoke:
+          title: invoke
+          version: 2.0.0
+          verb: keep
+          target-url: >-
+            http://cap-sg-prd-2.securegateway.appdomain.cloud:18835$(request.path)
+          follow-redirects: false
+          timeout: 60
+          parameter-control:
+            type: blocklist
+          header-control:
+            type: blocklist
+            values:
+              - ^X-IBM-Client-Id$
+          inject-proxy-headers: true
+  type: rest
+  phase: realized
+  enforced: true
+  testable: true
+  activity-log:
+    enabled: true
+    error-content: header
+    success-content: activity
+  application-authentication:
+    certificate: false
+definitions:
+  getFindItemMulti_response_200:
+    type: object
+    properties:
+      DFH0XCP1:
+        type: object
+        properties:
+          returnCode:
+            type: integer
+            minimum: 0
+            maximum: 99
+          responseMsg:
+            type: string
+            maxLength: 79
+          results:
+            type: object
+            properties:
+              resultCount:
+                type: integer
+                minimum: 0
+                maximum: 999
+              itemList:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    itemNum:
+                      type: integer
+                      minimum: 0
+                      maximum: 9999
+                    description:
+                      type: string
+                      maxLength: 40
+                    dept:
+                      type: integer
+                      minimum: 0
+                      maximum: 999
+                    price:
+                      type: string
+                      maxLength: 6
+                    inStockQty:
+                      type: integer
+                      minimum: 0
+                      maximum: 9999
+                    onOrderQty:
+                      type: integer
+                      minimum: 0
+                      maximum: 999
+                maxItems: 15
+                minItems: 15
+paths:
+  /:
+    get:
+      tags:
+        - findAllItems
+      operationId: getFindItemMulti
+      parameters:
+        - name: Authorization
+          in: header
+          required: false
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/getFindItemMulti_response_200'
