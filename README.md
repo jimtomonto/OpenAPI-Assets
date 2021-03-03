@@ -1,0 +1,2 @@
+# OpenAPI-Assets
+OpenAPI Assets
